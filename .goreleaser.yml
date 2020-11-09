@@ -1,0 +1,49 @@
+builds:
+- env:
+  - CGO_ENABLED=0
+  goos:
+    - freebsd
+    - windows
+    - darwin
+    - linux
+  goarch:
+    - amd64
+    - arm
+    - arm64
+archives:
+- replacements:
+    darwin: Darwin
+    linux: Linux
+    windows: Windows
+    386: i386
+    amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+signs:
+- artifacts: all
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+# nfpms:
+#   # note that this is an array of nfpm configs
+#   -
+#     homepage: https://github.com/andrewrech/s3link
+#     maintainer: "Andrew J. Rech <rech@rech.io>"
+#     license: "LGPL 3.0"
+#     formats:
+#       - deb
+#       - rpm
+# brews:
+#   -
+    # Repository to push the tap to.
+    # github:
+    #   owner: andrewrech
+    #   name: homebrew-s3link
+    # commit_author:
+    #   name: andrewrech
+    #   email: rech@rech.io
