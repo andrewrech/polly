@@ -51,7 +51,7 @@ func main() {
 	format := flag.String("format", "mp3", "Output format (mp3, ogg_vorbis, or pcm)")
 	outputS3BucketName := flag.String("bucket", "my-bucket", "Output S3 bucket name")
 	outputS3BucketPrefix := flag.String("prefix", "<filename>", "Output S3 bucket prefix")
-	voiceID := flag.String("voice", "Joanna", "Voice to use for synthesis (Joanna, Salli, Kendra, Matthew")
+	voiceID := flag.String("voice", "Joanna", "Voice to use for synthesis (Joanna, Salli, Kendra, Matthew, Amy [British], Brian [British], Olivia [Australian])")
 	dryrun := flag.Bool("dry-run", false, "Print TTS text without uploading?")
 
 	flag.Parse()

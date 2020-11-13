@@ -32,7 +32,7 @@ changelog:
 # nfpms:
 #   # note that this is an array of nfpm configs
 #   -
-#     homepage: https://github.com/andrewrech/s3link
+#     homepage: https://github.com/andrewrech/polly
 #     maintainer: "Andrew J. Rech <rech@rech.io>"
 #     license: "LGPL 3.0"
 #     formats:
