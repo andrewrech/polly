@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -16,7 +15,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/polly"
 	"github.com/sergi/go-diff/diffmatchpatch"
@@ -30,13 +28,10 @@ func usage() {
 		fmt.Fprintf(os.Stderr, "\nDefaults:\n")
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, `
-Environmental variables:
+Optional environmental variables:
 
-    export AWS_ACCESS_KEY_ID=my_iam_access_key
-    export AWS_SECRET_ACCESS_KEY=my_iam_secret
+    export AWS_SHARED_CREDENTIALS_PROFILE=default
     export AWS_SNS_TOPIC_ARN=my_topic_arn
-    export AWS_DEFAULT_REGION=my_region_name
-    export AWS_SESSION_TOKEN=my_iam_session_token [optional]
 
 `)
 	}
@@ -75,14 +70,32 @@ func main() {
 	s := string(text)
 	sOut := TTSformat(s)
 
-	input := polly.StartSpeechSynthesisTaskInput{
-		Engine:             engine,
-		OutputFormat:       format,
-		OutputS3BucketName: outputS3BucketName,
-		OutputS3KeyPrefix:  outputS3BucketPrefix,
-		SnsTopicArn:        aws.String(vars.snsTopic),
-		Text:               aws.String(sOut),
-		VoiceId:            voiceID,
+	var input polly.StartSpeechSynthesisTaskInput
+
+	if *aws.String(vars.snsTopic) == "" {
+
+		input = polly.StartSpeechSynthesisTaskInput{
+			Engine:             engine,
+			OutputFormat:       format,
+			OutputS3BucketName: outputS3BucketName,
+			OutputS3KeyPrefix:  outputS3BucketPrefix,
+			Text:               aws.String(sOut),
+			VoiceId:            voiceID,
+		}
+
+	}
+
+	if *aws.String(vars.snsTopic) != "" {
+		input = polly.StartSpeechSynthesisTaskInput{
+			Engine:             engine,
+			OutputFormat:       format,
+			OutputS3BucketName: outputS3BucketName,
+			OutputS3KeyPrefix:  outputS3BucketPrefix,
+			SnsTopicArn:        aws.String(vars.snsTopic),
+			Text:               aws.String(sOut),
+			VoiceId:            voiceID,
+		}
+
 	}
 
 	// print text transformation without uploading
@@ -130,19 +143,23 @@ func getDiff(s, sOut string) {
 
 // getInput generates an AWS Polly task input.
 func getInput(i polly.StartSpeechSynthesisTaskInput, vars envVars) (c *polly.Polly, output *polly.StartSpeechSynthesisTaskOutput) {
-	// Initialize a session that the SDK uses to load
-	config := aws.Config{
-		Region:      aws.String(vars.region),
-		Credentials: credentials.NewStaticCredentials(vars.id, vars.secret, vars.token),
-	}
 
-	// create S3 upload manager
-	sess := session.Must(session.NewSession(&config))
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+		Profile:           vars.credentialProfile,
+	}))
+
+	// sess := session.Must(session.NewSession(&config))
+
+	_, err := sess.Config.Credentials.Get()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	// Create Polly client
 	c = polly.New(sess)
 
-	output, err := c.StartSpeechSynthesisTask(&i)
+	output, err = c.StartSpeechSynthesisTask(&i)
 	if err != nil {
 		log.Fatalln("Got error calling SynthesizeSpeech:", err.Error())
 	}
@@ -229,43 +246,23 @@ func download(url string) {
 }
 
 type envVars struct {
-	id       string
-	secret   string
-	snsTopic string
-	region   string
-	token    string
+	snsTopic          string
+	region            string
+	credentialPath    string
+	credentialProfile string
 }
 
 // loadVars loads required environmental variables.
 func loadVars() (vars envVars, err error) {
-	id, ok := os.LookupEnv("AWS_ACCESS_KEY_ID")
+	snsTopic, _ := os.LookupEnv("AWS_SNS_TOPIC_ARN")
+
+	credentialProfile, ok := os.LookupEnv("AWS_SHARED_CREDENTIALS_PROFILE")
 	if !ok {
-		log.Fatalln()
-		return vars, errors.New("AWS_ACCESS_KEY_ID is unset")
+		credentialProfile = "default"
 	}
 
-	secret, ok := os.LookupEnv("AWS_SECRET_ACCESS_KEY")
-	if !ok {
-		return vars, errors.New("AWS_SECRET_ACCESS_KEY is unset")
-	}
-
-	snsTopic, ok := os.LookupEnv("AWS_SNS_TOPIC_ARN")
-	if !ok {
-		return vars, errors.New("AWS_SNS_TOPIC_ARN is unset")
-	}
-
-	region, ok := os.LookupEnv("AWS_DEFAULT_REGION")
-	if !ok {
-		return vars, errors.New("AWS_DEFAULT_REGION is unset")
-	}
-
-	token, _ := os.LookupEnv("AWS_SESSION_TOKEN")
-
-	vars.id = id
-	vars.secret = secret
-	vars.region = region
 	vars.snsTopic = snsTopic
-	vars.token = token
+	vars.credentialProfile = credentialProfile
 
 	return vars, nil
 }
