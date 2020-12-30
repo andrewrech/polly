@@ -247,8 +247,6 @@ func download(url string) {
 
 type envVars struct {
 	snsTopic          string
-	region            string
-	credentialPath    string
 	credentialProfile string
 }
 
@@ -275,7 +273,7 @@ func TTSformat(s string) string {
 
 	// text transformations to improve readability
 
-	// remove parenthetical
+	// remove parentheticals
 	// some are legitimate, but parenthetical in scientific papers
 	// generally these are more important, and it is better
 	// from a perspective of concentration to remove all
@@ -291,20 +289,6 @@ func TTSformat(s string) string {
 	// remove NCT identifiers without spaces
 	re = regexp.MustCompile(`( ?)\(NCT[0-9, ]{5,100}\)( ?)`)
 	s = re.ReplaceAllString(s, " ")
-
-	// numbers except for zero, optionally with comma number,
-	// even without parentheses
-	// that are preceded by lower case letters,
-	// are mostly references
-	// note \-– for two forms of dashes
-	re = regexp.MustCompile(`( ?)[a-z]{2,}[1-9]{1,3}([\-–,][1-9]{1,3})?\.( ?)`)
-	s = re.ReplaceAllString(s, "$1$2 ")
-
-	re = regexp.MustCompile(`,[1-9]{1,3}([-–,][1-9]{1,3})`)
-	s = re.ReplaceAllString(s, ",")
-
-	re = regexp.MustCompile(`\.[1-9]{1,3}([-–,][1-9]{1,3})`)
-	s = re.ReplaceAllString(s, ".")
 
 	// finally, normalize white space
 	re = regexp.MustCompile(` {2,}`)
