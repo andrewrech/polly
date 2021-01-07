@@ -12,36 +12,11 @@ go get -u -v github.com/andrewrech/polly
 
 ## Usage
 
-```zsh
-polly -h
+See `polly -h`.
 
-```
+## Documentation
 
-```
-Defaults:
-  -bucket string
-        Output S3 bucket name (default "my-bucket")
-  -dry-run
-        Print TTS text without uploading?
-  -engine string
-        TTS engine (standard or neural) (default "neural")
-  -format string
-        Output format (mp3, ogg_vorbis, or pcm) (default "mp3")
-  -input string
-        Filename containing text to convert (default "input.txt")
-  -prefix string
-        Output S3 bucket prefix (default "<filename>")
-  -voice string
-        Voice to use for synthesis (Joanna, Salli, Kendra, Matthew (default "Joanna")
-
-Environmental variables:
-
-    export AWS_ACCESS_KEY_ID=my_iam_access_key
-    export AWS_SECRET_ACCESS_KEY=my_iam_secret
-    export AWS_SNS_TOPIC_ARN=my_topic_arn
-    export AWS_DEFAULT_REGION=my_region_name
-    export AWS_SESSION_TOKEN=my_iam_session_token [optional]
-```
+See [docs](https://github.com/andrewrech/polly/blob/main/docs.md)
 
 ## Testing
 
