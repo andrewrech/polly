@@ -3,12 +3,51 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/polly"
 	"github.com/google/go-cmp/cmp"
 )
+
+func TestMain(m *testing.M) {
+
+	exitVal := m.Run()
+
+	// delete test output if it exists
+	testOutput := []string{
+		"www.google.com",
+	}
+
+	files, err := ioutil.ReadDir("./")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// delete downloaded test mp3
+	for _, f := range files {
+		fn := f.Name()
+
+		if strings.HasPrefix(fn, "-testdata-test") && strings.HasSuffix(fn, ".mp3") {
+			testOutput = append(testOutput, fn)
+		}
+	}
+
+	for _, f := range testOutput {
+		_, err := os.Stat(f)
+
+		if err == nil {
+			err := os.Remove(f)
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}
+	}
+
+	os.Exit(exitVal)
+}
 
 func TestTTS(t *testing.T) {
 	vars, err := loadVars()
@@ -51,6 +90,31 @@ func TestTTS(t *testing.T) {
 			t.Fatalf(diff)
 		}
 	})
+
+	t.Run("Task output handler", func(t *testing.T) {
+		outputHandler(c, output)
+	})
+
+}
+
+func TestDownload(t *testing.T) {
+
+	download("https://www.google.com")
+
+	_, err := os.Stat("www.google.com")
+
+	fi, err := os.Stat("www.google.com")
+
+	t.Run("download", func(t *testing.T) {
+		if err != nil {
+			t.Fatalf("Download file does not exist")
+		}
+
+		if fi.Size() == 0 {
+			t.Fatalf("Download file empty")
+		}
+	})
+
 }
 
 func TestTTSformat(t *testing.T) {
