@@ -16,7 +16,7 @@ See `polly -h`.
 
 ## Documentation
 
-See [docs](https://github.com/andrewrech/polly/blob/main/docs.md)
+See [docs](https://github.com/andrewrech/polly/blob/main/docs.md).
 
 ## Testing
 
