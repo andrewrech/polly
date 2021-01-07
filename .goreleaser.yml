@@ -1,13 +1,14 @@
 before:
   hooks:
     - go mod download
-    - gomarkdoc -u . > doc.md
+    - echo '```' > doc.md; polly -h >> doc.md 2>&1; echo '```' >> doc.md; gomarkdoc ./cmd/main.go >> doc.md
 release:
   github:
     owner: andrewrech
     name: polly
 builds:
   -
+    main: ./cmd/polly.go
     env:
       - CGO_ENABLED=0
     goos:
@@ -15,7 +16,6 @@ builds:
       - freebsd
       - windows
       - darwin
-    main: main.go
 dockers:
   -
     binaries:
@@ -31,7 +31,6 @@ archives:
       darwin: Darwin
       linux: Linux
       windows: Windows
-      386: i386
       amd64: x86_64
     files:
       - "*md"
