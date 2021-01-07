@@ -48,7 +48,7 @@ func main() {
 	outputS3BucketName := flag.String("bucket", "my-bucket", "Output S3 bucket name")
 	outputS3BucketPrefix := flag.String("prefix", "<filename>", "Output S3 bucket prefix")
 	voiceID := flag.String("voice", "Joanna", "Voice to use for synthesis (Joanna, Salli, Kendra, Matthew, Amy [British], Brian [British], Olivia [Australian])")
-	dryrun := flag.Bool("dry-run", false, "Print TTS text without uploading?")
+	dryrun := flag.Bool("dry-run", false, "Print TTS text without uploading")
 
 	flag.Parse()
 
@@ -61,18 +61,18 @@ func main() {
 		outputS3BucketPrefix = getFnPrefix(fileName)
 	}
 
-	// Open text file and get it's contents as a string
+	// open text file
 	text, err := ioutil.ReadFile(*fileName)
 	if err != nil {
 		log.Fatalln("Got error opening file:", err.Error())
 	}
 
-	// Convert bytes to string
 	s := string(text)
 	sOut := TTSformat(s)
 
 	var input polly.StartSpeechSynthesisTaskInput
 
+	// with or without SNS topic
 	if *aws.String(vars.snsTopic) == "" {
 
 		input = polly.StartSpeechSynthesisTaskInput{
@@ -83,10 +83,8 @@ func main() {
 			Text:               aws.String(sOut),
 			VoiceId:            voiceID,
 		}
+	} else {
 
-	}
-
-	if *aws.String(vars.snsTopic) != "" {
 		input = polly.StartSpeechSynthesisTaskInput{
 			Engine:             engine,
 			OutputFormat:       format,
@@ -96,7 +94,6 @@ func main() {
 			Text:               aws.String(sOut),
 			VoiceId:            voiceID,
 		}
-
 	}
 
 	// print text transformation without uploading
@@ -145,12 +142,11 @@ func getDiff(s, sOut string) {
 // getInput generates an AWS Polly task input.
 func getInput(i polly.StartSpeechSynthesisTaskInput, vars envVars) (c *polly.Polly, output *polly.StartSpeechSynthesisTaskOutput) {
 
+	// use shared credentials
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 		Profile:           vars.credentialProfile,
 	}))
-
-	// sess := session.Must(session.NewSession(&config))
 
 	_, err := sess.Config.Credentials.Get()
 	if err != nil {
@@ -215,7 +211,7 @@ func getTaskStatus(c *polly.Polly, output *polly.StartSpeechSynthesisTaskOutput)
 	return *ret.SynthesisTask.TaskStatus
 }
 
-// download download a url to a local file.
+// download downloads a url to a local file.
 func download(url string) {
 	r, err := http.Get(url)
 	if err != nil {
@@ -225,14 +221,12 @@ func download(url string) {
 
 	f := path.Base(url)
 
-	// Create the file
 	out, err := os.Create(f)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer out.Close()
 
-	// Write the body to file
 	_, err = io.Copy(out, r.Body)
 	if err != nil {
 		log.Fatalln(err)
