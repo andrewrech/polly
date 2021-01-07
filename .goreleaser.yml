@@ -1,25 +1,50 @@
+before:
+  hooks:
+    - go mod download
+    - gomarkdoc -u . > doc.md
+release:
+  github:
+    owner: andrewrech
+    name: polly
 builds:
-- env:
-  - CGO_ENABLED=0
-  goos:
-    - darwin
-    - linux
-  goarch:
-    - amd64
+  -
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - freebsd
+      - windows
+      - darwin
+    main: main.go
+dockers:
+  -
+    binaries:
+      - polly
+    image_templates:
+      - "andrewrech/polly:{{ .Tag }}"
+      - "andrewrech/polly:v{{ .Major }}"
+      - "andrewrech/polly:v{{ .Major }}.{{ .Minor }}"
+      - "andrewrech/polly:latest"
 archives:
-- replacements:
-    darwin: Darwin
-    linux: Linux
-    amd64: x86_64
+  -
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+    files:
+      - "*md"
+signs:
+  -
+    artifacts: all
 checksum:
   name_template: 'checksums.txt'
 snapshot:
   name_template: "{{ .Tag }}-next"
-signs:
-- artifacts: all
 changelog:
   sort: asc
   filters:
     exclude:
-    - '^docs:'
-    - '^test:'
+      - '^docs:'
+      - '^test:'
