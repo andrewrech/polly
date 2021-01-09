@@ -1,14 +1,14 @@
 before:
   hooks:
-    - go mod download
-    - echo '```' > doc.md; polly -h >> doc.md 2>&1; echo '```' >> doc.md; gomarkdoc ./cmd/main.go >> doc.md
+    - go mod vendor
+    - echo '```' > docs.md; polly -h >> docs.md 2>&1; echo '```' >> docs.md; gomarkdoc -u . >> docs.md
 release:
   github:
     owner: andrewrech
     name: polly
 builds:
   -
-    main: ./cmd/polly.go
+    main: polly.go
     env:
       - CGO_ENABLED=0
     goos:

@@ -1,4 +1,4 @@
-[![GoDoc](https://godoc.org/github.com/andrewrech/polly?status.svg)](https://godoc.org/github.com/andrewrech/polly) ![](https://img.shields.io/badge/version-0.0.2-blue.svg) [![](https://goreportcard.com/badge/github.com/andrewrech/polly)](https://goreportcard.com/report/github.com/andrewrech/polly)
+[![GoDoc](https://godoc.org/github.com/andrewrech/polly?status.svg)](https://godoc.org/github.com/andrewrech/polly) [![](https://goreportcard.com/badge/github.com/andrewrech/polly)](https://goreportcard.com/report/github.com/andrewrech/polly) ![](https://img.shields.io/badge/docker-andrewrech/polly:latest-blue?style=plastic&logo=docker)
 
 # polly
 
@@ -6,17 +6,15 @@
 
 ## Installation
 
+See [Releases](https://github.com/andrewrech/polly/releases).
+
 ```zsh
 go get -u -v github.com/andrewrech/polly
 ```
 
 ## Usage
 
-See `polly -h`.
-
-## Documentation
-
-See [docs](https://github.com/andrewrech/polly/blob/main/docs.md).
+See `polly -h` or [documentation](https://github.com/andrewrech/polly/blob/main/docs.md)).
 
 ## Testing
 
