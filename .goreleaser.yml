@@ -1,6 +1,7 @@
 before:
   hooks:
     - go mod vendor
+    - go install
     - echo '```' > docs.md; polly -h >> docs.md 2>&1; echo '```' >> docs.md; gomarkdoc -u . >> docs.md
 release:
   github:
@@ -18,8 +19,6 @@ builds:
       - darwin
 dockers:
   -
-    binaries:
-      - polly
     image_templates:
       - "andrewrech/polly:{{ .Tag }}"
       - "andrewrech/polly:v{{ .Major }}"
