@@ -19,6 +19,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/polly"
 	_ "github.com/davecgh/go-spew/spew"
 	"github.com/sergi/go-diff/diffmatchpatch"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 // usage prints package usage.
@@ -48,7 +50,7 @@ func main() {
 	outputS3BucketName := flag.String("bucket", "my-bucket", "Output S3 bucket name")
 	outputS3BucketPrefix := flag.String("prefix", "<filename>", "Output S3 bucket prefix")
 	voiceID := flag.String("voice", "Joanna", "Voice to use for synthesis (Joanna, Salli, Kendra, Matthew, Amy [British], Brian [British], Olivia [Australian])")
-	dryrun := flag.Bool("dry-run", false, "Print TTS text without uploading")
+	dryrun := flag.Bool("dry-run", false, "Print TTS to stdout and file without processing.")
 
 	flag.Parse()
 
@@ -99,6 +101,13 @@ func main() {
 	// print text transformation without uploading
 	if *dryrun {
 		getDiff(s, sOut)
+
+		f := getFnDryrun(fileName)
+		err := os.WriteFile(*f, []byte(sOut), 0644)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
 	}
 
 	if !*dryrun {
@@ -173,6 +182,19 @@ func getFnPrefix(fileName *string) (ret *string) {
 	fNPrefix = rmSpec.ReplaceAllString(fNPrefix, "-")
 
 	return (&fNPrefix)
+}
+
+// getFnDryrun returns a text output filename to use for --dry-run.
+func getFnDryrun(fileName *string) (ret *string) {
+	fNPrefix := strings.TrimSuffix(*fileName, path.Ext(*fileName))
+
+	rmSpec := regexp.MustCompile("[^A-Za-z0-9]+")
+
+	fNPrefix = rmSpec.ReplaceAllString(fNPrefix, "-")
+
+	fN := fNPrefix + ".polly.dryrun.txt"
+
+	return (&fN)
 }
 
 // outputHandler waits for AWS Polly task completion and handles output, generating a download link.
@@ -260,11 +282,45 @@ func loadVars() (vars envVars, err error) {
 	return vars, nil
 }
 
+func normlizeLines(str string) string {
+	ss := strings.Split(strings.ReplaceAll(str, "\r\n", "\n"), "\n")
+
+	var norm strings.Builder
+
+	for _, line := range ss {
+		lineNorm := stripCtlAndExtFromUnicode(line)
+		fmt.Println(lineNorm)
+		norm.WriteString(lineNorm)
+		norm.WriteString("\n")
+	}
+
+	ret := norm.String()
+	return ret
+}
+
+// https://rosettacode.org/wiki/Strip_control_codes_and_extended_characters_from_a_string#Go
+// Advanced Unicode normalization and filtering,
+// see http://blog.golang.org/normalization and
+// http://godoc.org/golang.org/x/text/unicode/norm for more
+// details.
+func stripCtlAndExtFromUnicode(str string) string {
+	isOk := func(r rune) bool {
+		return r < 32 || r >= 127
+	}
+	// The isOk filter is such that there is no need to chain to norm.NFC
+	t := transform.Chain(norm.NFKD, transform.RemoveFunc(isOk))
+	// This Transformer could also trivially be applied as an io.Reader
+	// or io.Writer filter to automatically do such filtering when reading
+	// or writing data anywhere.
+	str, _, _ = transform.String(t, str)
+	return str
+}
+
 // TTSforrmat formats a string for text-to-speech by removing
 // most parantheticals and references.
 func TTSformat(s string) string {
 	re := regexp.MustCompile(`\n{2,}`)
-	s = re.ReplaceAllString(s, "\n\nNext.\n\n")
+	s = re.ReplaceAllString(s, "\n\n")
 
 	// text transformations to improve readability
 
@@ -285,7 +341,9 @@ func TTSformat(s string) string {
 	re = regexp.MustCompile(`( ?)\(NCT[0-9, ]{5,100}\)( ?)`)
 	s = re.ReplaceAllString(s, " ")
 
-	// finally, normalize white space
+	s = normlizeLines(s)
+
+	// normalize white space
 	re = regexp.MustCompile(` {2,}`)
 	s = re.ReplaceAllString(s, " ")
 	re = regexp.MustCompile(` ,`)

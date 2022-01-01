@@ -121,12 +121,12 @@ func TestTTSformat(t *testing.T) {
 	s := `Title
 
 Summary
-Some text (NCT2345432) more (123) text (Author et al, 2020), figure (Fig. 3).22,23 Tumor cells2.`
+Some text (NCT2345432) moré (123) text (Author et al, 2020), figure (Fig. 3).22,23 Tumor cells2.`
 
 	sOut := TTSformat(s)
 
 	t.Run("Task output generation", func(t *testing.T) {
-		diff := cmp.Diff(sOut, "Title\n\nNext.\n\nSummary\nSome text more text, figure.22,23 Tumor cells2.")
+		diff := cmp.Diff(sOut, "Title\n\nSummary\nSome text more text, figure.22,23 Tumor cells2.\n")
 		if diff != "" {
 			t.Fatalf(diff)
 		}
