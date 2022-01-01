@@ -1,29 +1,25 @@
 before:
   hooks:
     - go mod vendor
-    - go install
-    - echo '```' > docs.md; polly -h >> docs.md 2>&1; echo '```' >> docs.md; gomarkdoc -u . >> docs.md
+    - go mod tidy
 release:
   github:
     owner: andrewrech
     name: polly
 builds:
   -
-    main: polly.go
     env:
       - CGO_ENABLED=0
     goos:
       - linux
-      - freebsd
       - windows
       - darwin
-dockers:
-  -
-    image_templates:
-      - "andrewrech/polly:{{ .Tag }}"
-      - "andrewrech/polly:v{{ .Major }}"
-      - "andrewrech/polly:v{{ .Major }}.{{ .Minor }}"
-      - "andrewrech/polly:latest"
+    goarch:
+      - amd64
+      - arm
+      - arm64
+universal_binaries:
+  - replace: true
 archives:
   -
     replacements:
