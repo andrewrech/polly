@@ -39,15 +39,6 @@ Optional environmental variables:
     export AWS_SNS_TOPIC_ARN=my_topic_arn
 ```
 
-## Testing
-
-```zsh
-git clone https://github.com/andrewrech/polly &&
-cd polly
-
-go test
-```
-
 ## Authors
 
 - [Andrew J. Rech](mailto:rech@rech.io)
