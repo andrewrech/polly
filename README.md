@@ -8,10 +8,6 @@
 
 See [Releases](https://github.com/andrewrech/polly/releases).
 
-```zsh
-go get -u -v github.com/andrewrech/polly
-```
-
 ## Usage
 
 See `polly -h`:
