@@ -14,7 +14,34 @@ go get -u -v github.com/andrewrech/polly
 
 ## Usage
 
-See `polly -h` or [documentation](https://github.com/andrewrech/polly/blob/main/docs.md)).
+See `polly -h`:
+
+```
+Transform academic plain text files into audio using AWS Polly.
+
+Usage of polly:
+
+Defaults:
+  -bucket string
+        Output S3 bucket name (default "my-bucket")
+  -dry-run
+        Print TTS to file without processing. (default true)
+  -engine string
+        TTS engine (standard or neural) (default "neural")
+  -format string
+        Output format (mp3, ogg_vorbis, or pcm) (default "mp3")
+  -input string
+        Filename containing text to convert (default "input.txt")
+  -prefix string
+        Output S3 bucket prefix (default "<filename>")
+  -voice string
+        Voice to use for synthesis (Joanna, Salli, Kendra, Matthew, Amy [British], Brian [British], Olivia [Australian]) (default "Joanna")
+
+Optional environmental variables:
+
+    export AWS_SHARED_CREDENTIALS_PROFILE=default
+    export AWS_SNS_TOPIC_ARN=my_topic_arn
+```
 
 ## Testing
 
