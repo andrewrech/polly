@@ -1,4 +1,4 @@
-[![GoDoc](https://godoc.org/github.com/andrewrech/polly?status.svg)](https://godoc.org/github.com/andrewrech/polly) [![](https://goreportcard.com/badge/github.com/andrewrech/polly)](https://goreportcard.com/report/github.com/andrewrech/polly) ![](https://img.shields.io/badge/docker-andrewrech/polly:0.0.4-blue?style=plastic&logo=docker)
+[![GoDoc](https://godoc.org/github.com/andrewrech/polly?status.svg)](https://godoc.org/github.com/andrewrech/polly) [![](https://goreportcard.com/badge/github.com/andrewrech/polly)](https://goreportcard.com/report/github.com/andrewrech/polly)
 
 # polly
 
